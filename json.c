@@ -96,7 +96,7 @@ static struct json_object *driver_info(int fd)
 
 	struct json_object *client_caps_obj = json_object_new_object();
 	for (size_t i = 0; i < sizeof(client_caps) / sizeof(client_caps[0]); ++i) {
-		bool supported = drmSetClientCap(fd, client_caps[i].cap, 1) == 0;
+		bool supported = false; // drmSetClientCap(fd, client_caps[i].cap, 1) == 0;
 		json_object_object_add(client_caps_obj, client_caps[i].name,
 			json_object_new_boolean(supported));
 	}

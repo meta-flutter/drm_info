@@ -1,0 +1,821 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$ref": "#/$defs/node",
+	"$defs": {
+		"int64": {
+			"type": "integer",
+			"minimum": -9223372036854775808,
+			"maximum": 9223372036854775807
+		},
+		"uint16": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 65535
+		},
+		"uint32": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 4294967295
+		},
+		"uint64": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 18446744073709551615
+		},
+		"node": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"driver": {
+					"$ref": "#/$defs/driver"
+				},
+				"device": {
+					"$ref": "#/$defs/device"
+				},
+				"fb_size": {
+					"$ref": "#/$defs/fb_size"
+				},
+				"connectors": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/connector"
+					}
+				},
+				"encoders": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/encoder"
+					}
+				},
+				"crtcs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/crtc"
+					}
+				},
+				"planes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/plane"
+					}
+				}
+			},
+			"required": [
+				"driver",
+				"device"
+			]
+		},
+		"driver": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"desc": {
+					"type": "string"
+				},
+				"version": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"major": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"minor": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"patch": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"date": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"major",
+						"minor",
+						"patch",
+						"date"
+					]
+				},
+				"kernel": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"sysname": {
+							"type": "string"
+						},
+						"release": {
+							"type": "string"
+						},
+						"version": {
+							"type": "string"
+						}
+					}
+				},
+				"client_caps": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "boolean"
+					}
+				},
+				"caps": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/$defs/uint64"
+					}
+				}
+			},
+			"required": [
+				"name",
+				"desc",
+				"version",
+				"kernel",
+				"client_caps",
+				"caps"
+			]
+		},
+		"device": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"available_nodes": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"bus_type": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"device_data": {
+					"$ref": "#/$defs/device_data"
+				},
+				"bus_data": {
+					"$ref": "#/$defs/bus_data"
+				}
+			},
+			"required": [
+				"available_nodes",
+				"bus_type"
+			]
+		},
+		"device_data": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/device_pci"
+				},
+				{
+					"$ref": "#/$defs/device_usb"
+				},
+				{
+					"$ref": "#/$defs/device_platform"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"device_pci": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"vendor": {
+					"$ref": "#/$defs/uint16"
+				},
+				"device": {
+					"$ref": "#/$defs/uint16"
+				},
+				"subsystem_vendor": {
+					"$ref": "#/$defs/uint16"
+				},
+				"subsystem_device": {
+					"$ref": "#/$defs/uint16"
+				}
+			},
+			"required": [
+				"vendor",
+				"device",
+				"subsystem_vendor",
+				"subsystem_device"
+			]
+		},
+		"device_usb": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"vendor": {
+					"$ref": "#/$defs/uint16"
+				},
+				"product": {
+					"$ref": "#/$defs/uint16"
+				}
+			},
+			"required": [
+				"vendor",
+				"product"
+			]
+		},
+		"device_platform": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"compatible": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"compatible"
+			]
+		},
+		"bus_data": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/bus_pci"
+				},
+				{
+					"$ref": "#/$defs/bus_usb"
+				},
+				{
+					"$ref": "#/$defs/bus_platform"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"bus_pci": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"domain": {
+					"$ref": "#/$defs/uint16"
+				},
+				"bus": {
+					"$ref": "#/$defs/uint8"
+				},
+				"slot": {
+					"$ref": "#/$defs/uint8"
+				},
+				"function": {
+					"$ref": "#/$defs/uint8"
+				}
+			},
+			"required": [
+				"domain",
+				"bus",
+				"slot",
+				"function"
+			]
+		},
+		"bus_usb": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"bus": {
+					"$ref": "#/$defs/uint8"
+				},
+				"device": {
+					"$ref": "#/$defs/uint8"
+				}
+			},
+			"required": [
+				"bus",
+				"device"
+			]
+		},
+		"bus_platform": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"fullname": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"fullname"
+			]
+		},
+		"fb_size": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"min_width": {
+					"$ref": "#/$defs/uint32"
+				},
+				"max_width": {
+					"$ref": "#/$defs/uint32"
+				},
+				"min_height": {
+					"$ref": "#/$defs/uint32"
+				},
+				"max_height": {
+					"$ref": "#/$defs/uint32"
+				}
+			},
+			"required": [
+				"min_width",
+				"max_width",
+				"min_height",
+				"max_height"
+			]
+		},
+		"connector": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"type": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"status": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"phy_width": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"phy_height": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"subpixel": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"encoder_id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"encoders": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/uint32"
+					}
+				},
+				"modes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/mode"
+					}
+				},
+				"properties": {
+					"$ref": "#/$defs/property_map"
+				}
+			},
+			"required": [
+				"id",
+				"type",
+				"status"
+			]
+		},
+		"mode": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"clock": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"hdisplay": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"hsync_start": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"hsync_end": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"htotal": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"hskew": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vdisplay": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vsync_start": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vsync_end": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vtotal": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vscan": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"vrefresh": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"flags": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"type": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"clock",
+				"hdisplay",
+				"hsync_start",
+				"hsync_end",
+				"htotal",
+				"hskew",
+				"vdisplay",
+				"vsync_start",
+				"vsync_end",
+				"vtotal",
+				"vscan",
+				"vrefresh",
+				"flags",
+				"type",
+				"name"
+			]
+		},
+		"encoder": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"type": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"crtc_id": {
+					"type": "integer",
+					"$ref": "#/$defs/uint32"
+				},
+				"possible_crtcs": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"possible_clones": {
+					"type": "integer",
+					"minimum": 0
+				}
+			},
+			"required": [
+				"id",
+				"type",
+				"possible_crtcs",
+				"possible_clones"
+			]
+		},
+		"crtc": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"fb_id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"x": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"y": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"mode": {
+					"oneOf": [
+						{
+							"$ref": "#/$defs/mode"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"gamma_size": {
+					"type": "integer"
+				},
+				"properties": {
+					"$ref": "#/$defs/property_map"
+				}
+			},
+			"required": [
+				"id"
+			]
+		},
+		"plane": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"possible_crtcs": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"crtc_id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"fb_id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"crtc_x": {
+					"type": "integer"
+				},
+				"crtc_y": {
+					"type": "integer"
+				},
+				"x": {
+					"type": "integer"
+				},
+				"y": {
+					"type": "integer"
+				},
+				"gamma_size": {
+					"type": "integer"
+				},
+				"fb": {
+					"oneOf": [
+						{
+							"$ref": "#/$defs/fb"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"formats": {
+					"$ref": "#/$defs/format_set"
+				},
+				"properties": {
+					"$ref": "#/$defs/property_map"
+				}
+			},
+			"required": [
+				"id",
+				"possible_crtcs",
+				"formats"
+			]
+		},
+		"fb": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"width": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"height": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"format": {
+					"$ref": "#/$defs/uint32"
+				},
+				"planes": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"properties": {
+							"offset": {
+								"type": "integer"
+							},
+							"pitch": {
+								"type": "integer"
+							}
+						},
+						"required": [
+							"offset",
+							"pitch"
+						]
+					}
+				}
+			},
+			"required": [
+				"id",
+				"width",
+				"height"
+			]
+		},
+		"property_map": {
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "#/$defs/property"
+			}
+		},
+		"property": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/uint32"
+				},
+				"flags": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"type": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"atomic": {
+					"type": "boolean"
+				},
+				"immutable": {
+					"type": "boolean"
+				},
+				"raw_value": {
+					"$ref": "#/$defs/uint64"
+				},
+				"spec": {
+					"$ref": "#/$defs/prop_spec"
+				},
+				"value": {
+					"oneOf": [
+						{
+							"$ref": "#/$defs/uint32"
+						},
+						{
+							"$ref": "#/$defs/uint64"
+						},
+						{
+							"$ref": "#/$defs/int64"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"data": {
+					"$ref": "#/$defs/prop_data"
+				}
+			},
+			"required": [
+				"id",
+				"flags",
+				"type",
+				"atomic",
+				"immutable",
+				"raw_value"
+			]
+		},
+		"prop_spec": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/prop_spec_range"
+				},
+				{
+					"$ref": "#/$defs/prop_spec_signed_range"
+				},
+				{
+					"$ref": "#/$defs/prop_spec_enum"
+				},
+				{
+					"$ref": "#/$defs/prop_spec_object"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"prop_spec_range": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"min": {
+					"$ref": "#/$defs/uint64"
+				},
+				"max": {
+					"$ref": "#/$defs/uint64"
+				}
+			},
+			"required": [
+				"min",
+				"max"
+			]
+		},
+		"prop_spec_signed_range": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"min": {
+					"$ref": "#/$defs/int64"
+				},
+				"max": {
+					"$ref": "#/$defs/int64"
+				}
+			},
+			"required": [
+				"min",
+				"max"
+			]
+		},
+		"prop_spec_enum": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"value": {
+						"$ref": "#/$defs/uint64"
+					}
+				},
+				"required": [
+					"name",
+					"value"
+				]
+			}
+		},
+		"prop_spec_object": {
+			"$ref": "#/$defs/uint32"
+		},
+		"prop_data": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/format_modifier_set"
+				},
+				{
+					"$ref": "#/$defs/mode"
+				},
+				{
+					"$ref": "#/$defs/format_set"
+				},
+				{
+					"type": "string"
+				},
+				{
+					"type": "integer"
+				},
+				{
+					"$ref": "#/$defs/fb"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"format_set": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/uint32"
+			}
+		},
+		"format_modifier_set": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"properties": {
+					"modifier": {
+						"$ref": "#/$defs/uint64"
+					},
+					"formats": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/uint32"
+						}
+					}
+				},
+				"required": [
+					"modifier",
+					"formats"
+				]
+			}
+		}
+	}
+}
