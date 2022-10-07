@@ -23,5 +23,6 @@ all available devices are printed.
 
 # AUTHORS
 
-Maintained by Scott Anderson <scott@anderso.nz>. For more information about
-drm_info development, see <https://github.com/ascent12/drm_info>.
+Created by Scott Anderson <scott@anderso.nz>, maintained by
+Simon Ser <contact@emersion.fr>. For more information about drm_info
+development, see <https://gitlab.freedesktop.org/emersion/drm_info>.
