@@ -43,7 +43,7 @@ Please help us gather more data! You can do so by uploading DRM information
 from your GPU.
 
 ```
-drm_info -j | curl -X POST -d @- https://drmdb.emersion.fr/submit
+drm_info -j | curl -d @- https://drmdb.emersion.fr/submit
 ```
 
 This will upload information about your GPUs, your GPU drivers and your
