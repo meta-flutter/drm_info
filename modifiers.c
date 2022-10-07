@@ -203,7 +203,7 @@ static void print_arm_modifier(uint64_t mod) {
 			printf("ARM_MISC(unknown)");
 		}
 		break;
-	case DRM_FORMAT_MOD_ARM_TYPE_AFRC:
+	case DRM_FORMAT_MOD_ARM_TYPE_AFRC:;
 		uint64_t cu_size_p0 = value & AFRC_FORMAT_MOD_CU_SIZE_MASK;
 		uint64_t cu_size_p12 = (value >> 4) & AFRC_FORMAT_MOD_CU_SIZE_MASK;
 		printf("ARM_AFRC(");
