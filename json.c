@@ -15,6 +15,7 @@
 #include <xf86drmMode.h>
 
 #include "drm_info.h"
+#include "tables.h"
 
 static const struct {
 	const char *name;
@@ -288,6 +289,69 @@ static struct json_object *path_info(int fd, uint32_t blob_id)
 	return obj;
 }
 
+static struct json_object *hdr_output_metadata_info(int fd, uint32_t blob_id)
+{
+	drmModePropertyBlobRes *blob = drmModeGetPropertyBlob(fd, blob_id);
+	if (!blob) {
+		perror("drmModeGetPropertyBlob");
+		return NULL;
+	}
+
+	struct json_object *obj = NULL;
+
+	// The type field in the struct comes first and is an u32
+	if (blob->length < sizeof(uint32_t)) {
+		fprintf(stderr, "HDR output metadata blob too short\n");
+		goto exit;
+	}
+
+	const struct hdr_output_metadata *meta = blob->data;
+
+	obj = json_object_new_object();
+	json_object_object_add(obj, "type", json_object_new_uint64(meta->metadata_type));
+
+	if (meta->metadata_type == HDMI_STATIC_METADATA_TYPE1) {
+		const size_t min_size = offsetof(struct hdr_output_metadata, hdmi_metadata_type1)
+			+ sizeof(struct hdr_metadata_infoframe);
+		if (blob->length < min_size) {
+			fprintf(stderr, "HDR output metadata blob too short\n");
+			goto exit;
+		}
+
+		const struct hdr_metadata_infoframe *info = &meta->hdmi_metadata_type1;
+		json_object_object_add(obj, "eotf", json_object_new_int(info->eotf));
+		// TODO: maybe add info->metadata_type, but seems to be the same as
+		// meta->metadata_type?
+		struct json_object *dp_obj = json_object_new_object();
+		static const char *dp_keys[] = {"r", "g", "b"};
+		for (size_t i = 0; i < 3; i++) {
+			struct json_object *coord_obj = json_object_new_object();
+			json_object_object_add(coord_obj, "x",
+				json_object_new_double(info->display_primaries[i].x / 50000.0));
+			json_object_object_add(coord_obj, "y",
+				json_object_new_double(info->display_primaries[i].y / 50000.0));
+			json_object_object_add(dp_obj, dp_keys[i], coord_obj);
+		}
+		json_object_object_add(obj, "display_primaries", dp_obj);
+		struct json_object *coord_obj = json_object_new_object();
+		json_object_object_add(coord_obj, "x",
+			json_object_new_double(info->white_point.x / 50000.0));
+		json_object_object_add(coord_obj, "y",
+			json_object_new_double(info->white_point.y / 50000.0));
+		json_object_object_add(obj, "white_point", coord_obj);
+		json_object_object_add(obj, "max_display_mastering_luminance",
+			json_object_new_int(info->max_display_mastering_luminance));
+		json_object_object_add(obj, "min_display_mastering_luminance",
+			json_object_new_double(info->min_display_mastering_luminance / 10000.0));
+		json_object_object_add(obj, "max_cll", json_object_new_int(info->max_cll));
+		json_object_object_add(obj, "max_fall", json_object_new_int(info->max_fall));
+	}
+
+exit:
+	drmModeFreePropertyBlob(blob);
+	return obj;
+}
+
 static struct json_object *fb_info(int fd, uint32_t id)
 {
 #ifdef HAVE_GETFB2
@@ -456,6 +520,8 @@ static struct json_object *properties_info(int fd, uint32_t id, uint32_t type)
 				data_obj = writeback_pixel_formats_info(fd, value);
 			} else if (strcmp(prop->name, "PATH") == 0) {
 				data_obj = path_info(fd, value);
+			} else if (strcmp(prop->name, "HDR_OUTPUT_METADATA") == 0) {
+				data_obj = hdr_output_metadata_info(fd, value);
 			}
 			break;
 		case DRM_MODE_PROP_RANGE:

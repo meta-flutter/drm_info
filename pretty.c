@@ -40,6 +40,16 @@ static uint64_t get_object_object_uint64(struct json_object *obj,
 	return json_object_get_uint64(uint64_obj);
 }
 
+static double get_object_object_double(struct json_object *obj,
+		const char *key)
+{
+	struct json_object *double_obj = json_object_object_get(obj, key);
+	if (!double_obj) {
+		return 0;
+	}
+	return json_object_get_double(double_obj);
+}
+
 static void print_driver(struct json_object *obj)
 {
 	const char *name = get_object_object_string(obj, "name");
@@ -367,6 +377,66 @@ static void print_path(struct json_object *obj, const char *prefix)
 	printf("%s" L_LAST "%s\n", prefix, json_object_get_string(obj));
 }
 
+static void print_hdr_output_metadata(struct json_object *obj,
+		const char *prefix)
+{
+	int type = get_object_object_uint64(obj, "type");
+
+	if (type != HDMI_STATIC_METADATA_TYPE1) {
+		printf("%s" L_LAST "Type: Reserved (%d)\n", prefix, type);
+		return;
+	}
+	printf("%s" L_VAL "Type: Static Metadata Type 1\n", prefix);
+
+	int eotf = get_object_object_uint64(obj, "eotf");
+	printf("%s" L_VAL "EOTF: ", prefix);
+	switch (eotf) {
+	case CTA_EOTF_TRADITIONAL_SDR:
+		printf("Traditional gamma - SDR");
+		break;
+	case CTA_EOTF_TRADITIONAL_HDR:
+		printf("Traditional gamma - HDR");
+		break;
+	case CTA_EOTF_SMPTE_2084:
+		printf("SMPTE ST 2084 (PQ)");
+		break;
+	case CTA_EOTF_HLG:
+		printf("HLG");
+		break;
+	default:
+		printf("Reserved (%d)", eotf);
+		break;
+	}
+	printf("\n");
+
+	struct json_object *dp_obj = json_object_object_get(obj, "display_primaries");
+	static const char *dp_keys[] = {"r", "g", "b"};
+	static const char *dp_names[] = {"Red", "Green", "Blue"};
+	printf("%s" L_VAL "Display primaries:\n", prefix);
+	for (size_t i = 0; i < 3; i++) {
+		struct json_object *coord_obj = json_object_object_get(dp_obj, dp_keys[i]);
+		printf("%s" L_LINE "%s%s: ", prefix, i == 2 ? L_LAST : L_VAL, dp_names[i]);
+		printf("(%.4f, %.4f)\n",
+			get_object_object_double(coord_obj, "x"),
+			get_object_object_double(coord_obj, "y"));
+	}
+
+	struct json_object *wp_obj = json_object_object_get(obj, "white_point");
+	printf("%s" L_VAL "White point: ", prefix);
+	printf("(%.4f, %.4f)\n",
+		get_object_object_double(wp_obj, "x"),
+		get_object_object_double(wp_obj, "y"));
+
+	printf("%s" L_VAL "Max display mastering luminance: %d cd/m²\n", prefix,
+		(int) get_object_object_uint64(obj, "max_display_mastering_luminance"));
+	printf("%s" L_VAL "Min display mastering luminance: %.4f cd/m²\n", prefix,
+		get_object_object_double(obj, "min_display_mastering_luminance"));
+	printf("%s" L_VAL "Max content light level: %d cd/m²\n", prefix,
+		(int) get_object_object_uint64(obj, "max_cll"));
+	printf("%s" L_LAST "Max frame average light level: %d cd/m²\n", prefix,
+		(int) get_object_object_uint64(obj, "max_fall"));
+}
+
 static void print_fb(struct json_object *obj, const char *prefix)
 {
 	uint32_t id = get_object_object_uint64(obj, "id");
@@ -517,6 +587,8 @@ static void print_properties(struct json_object *obj, const char *prefix)
 				print_writeback_pixel_formats(data_obj, sub_prefix);
 			else if (strcmp(prop_name, "PATH") == 0)
 				print_path(data_obj, sub_prefix);
+			else if (strcmp(prop_name, "HDR_OUTPUT_METADATA") == 0)
+				print_hdr_output_metadata(data_obj, sub_prefix);
 			break;
 		case DRM_MODE_PROP_BITMASK:
 			printf("bitmask {");
