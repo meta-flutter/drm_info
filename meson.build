@@ -61,7 +61,7 @@ if libdrm.version().version_compare('<2.4.114')
 elif libdrm.type_name() == 'internal'
   fourcc_h = meson.current_source_dir() / 'subprojects/libdrm/include/drm/drm_fourcc.h'
 else
-  fourcc_h = libdrm.get_pkgconfig_variable('pc_sysrootdir') /
+  fourcc_h = libdrm.get_pkgconfig_variable('pc_sysrootdir') +
     libdrm.get_pkgconfig_variable('includedir') / 'libdrm/drm_fourcc.h'
 endif
 
