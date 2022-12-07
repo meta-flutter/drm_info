@@ -31,7 +31,7 @@ static const char *amd_tile_version_str(uint64_t tile_version) {
 	case AMD_FMT_MOD_TILE_VER_GFX10_RBPLUS:
 		return "GFX10_RBPLUS";
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static const char *amd_tile_str(uint64_t tile, uint64_t tile_version) {
@@ -54,7 +54,7 @@ static const char *amd_tile_str(uint64_t tile, uint64_t tile_version) {
 			return "GFX9_64K_R_X";
 		}
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static const char *amd_dcc_block_size_str(uint64_t size) {
@@ -66,7 +66,7 @@ static const char *amd_dcc_block_size_str(uint64_t size) {
 	case AMD_FMT_MOD_DCC_BLOCK_256B:
 		return "256B";
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static bool amd_gfx9_tile_is_x_t(uint64_t tile) {
@@ -142,7 +142,7 @@ static const char *arm_afbc_block_size_str(uint64_t block_size) {
 	case AFBC_FORMAT_MOD_BLOCK_SIZE_32x8_64x4:
 		return "32x8_64x4";
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static const char *arm_afrc_cu_size_str(uint64_t cu_size) {
@@ -154,7 +154,7 @@ static const char *arm_afrc_cu_size_str(uint64_t cu_size) {
 	case AFRC_FORMAT_MOD_CU_SIZE_32:
 		return "32";
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static void print_arm_modifier(uint64_t mod) {
@@ -227,7 +227,7 @@ static const char *amlogic_layout_str(uint64_t layout) {
 	case AMLOGIC_FBC_LAYOUT_SCATTER:
 		return "SCATTER";
 	}
-	return "Unknown";
+	return "unknown";
 }
 
 static void print_amlogic_modifier(uint64_t mod) {

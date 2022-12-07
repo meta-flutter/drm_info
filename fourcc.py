@@ -37,7 +37,7 @@ const char *format_str(uint32_t format)
 
 	f.write('''\
 	default:
-		return "Unknown";
+		return "unknown";
 	}
 }
 
@@ -51,7 +51,7 @@ const char *basic_modifier_str(uint64_t modifier)
 
 	f.write('''\
 	default:
-		return "Unknown";
+		return "unknown";
 	}
 }
 ''')
