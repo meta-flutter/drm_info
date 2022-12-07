@@ -239,6 +239,59 @@ static void print_amlogic_modifier(uint64_t mod) {
 		(options & AMLOGIC_FBC_OPTION_MEM_SAVING) ? "MEM_SAVING" : "0");
 }
 
+static const char *vivante_color_tiling_str(uint64_t tiling) {
+	switch (tiling) {
+	case 0:
+		return "LINEAR";
+	case DRM_FORMAT_MOD_VIVANTE_TILED:
+		return "TILED";
+	case DRM_FORMAT_MOD_VIVANTE_SUPER_TILED:
+		return "SUPER_TILED";
+	case DRM_FORMAT_MOD_VIVANTE_SPLIT_TILED:
+		return "SPLIT_TILED";
+	case DRM_FORMAT_MOD_VIVANTE_SPLIT_SUPER_TILED:
+		return "SPLIT_SUPER_TILED";
+	}
+	return "Unknown";
+}
+
+static const char *vivante_tile_status_str(uint64_t ts) {
+	switch (ts) {
+	case VIVANTE_MOD_TS_64_4:
+		return "64_4";
+	case VIVANTE_MOD_TS_64_2:
+		return "64_2";
+	case VIVANTE_MOD_TS_128_4:
+		return "128_4";
+	case VIVANTE_MOD_TS_256_4:
+		return "256_4";
+	}
+	return "Unknown";
+}
+
+static const char *vivante_compression_str(uint64_t comp) {
+	switch (comp) {
+	case VIVANTE_MOD_COMP_DEC400:
+		return "DEC400";
+	}
+	return "Unknown";
+}
+
+static void print_vivante_modifier(uint64_t mod) {
+	uint64_t ts = mod & VIVANTE_MOD_TS_MASK;
+	uint64_t comp = mod & VIVANTE_MOD_COMP_MASK;
+	uint64_t tiling = mod & ~VIVANTE_MOD_EXT_MASK;
+
+	printf("VIVANTE(tiling = %s", vivante_color_tiling_str(tiling));
+	if (ts != 0) {
+		printf(", ts = %s", vivante_tile_status_str(ts));
+	}
+	if (comp != 0) {
+		printf(", comp = %s", vivante_compression_str(comp));
+	}
+	printf(")");
+}
+
 static uint8_t mod_vendor(uint64_t mod) {
 	return (uint8_t)(mod >> 56);
 }
@@ -256,6 +309,9 @@ void print_modifier(uint64_t mod) {
 		break;
 	case DRM_FORMAT_MOD_VENDOR_AMLOGIC:
 		print_amlogic_modifier(mod);
+		break;
+	case DRM_FORMAT_MOD_VENDOR_VIVANTE:
+		print_vivante_modifier(mod);
 		break;
 	default:
 		printf("%s", basic_modifier_str(mod));

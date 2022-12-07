@@ -1,4 +1,4 @@
 [wrap-git]
 url = https://gitlab.freedesktop.org/mesa/drm.git
-revision = libdrm-2.4.114
+revision = libdrm-2.4.115
 depth = 1

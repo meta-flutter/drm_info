@@ -41,7 +41,7 @@ inc = []
 #
 # We need to make sure we don't use any new libdrm functions, but those
 # are added very infrequently, so this is unlikely to be an issue.
-if libdrm.version().version_compare('<2.4.114')
+if libdrm.version().version_compare('<2.4.115')
   if libdrm.type_name() == 'internal'
     error('libdrm subproject out of date. Run `meson subprojects update`.')
   endif
