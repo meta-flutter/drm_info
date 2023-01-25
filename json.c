@@ -130,39 +130,66 @@ static struct json_object *device_info(int fd)
 	json_object_object_add(obj, "bus_type",
 		json_object_new_uint64(dev->bustype));
 
-	struct json_object *device_data_obj = NULL;
+	struct json_object *device_data_obj = NULL, *bus_data_obj = NULL;
 	switch (dev->bustype) {
 	case DRM_BUS_PCI:;
-		drmPciDeviceInfo *pci = dev->deviceinfo.pci;
+		drmPciDeviceInfo *pci_dev = dev->deviceinfo.pci;
+		drmPciBusInfo *pci_bus = dev->businfo.pci;
+
 		device_data_obj = json_object_new_object();
 		json_object_object_add(device_data_obj, "vendor",
-			json_object_new_uint64(pci->vendor_id));
+			json_object_new_uint64(pci_dev->vendor_id));
 		json_object_object_add(device_data_obj, "device",
-			json_object_new_uint64(pci->device_id));
+			json_object_new_uint64(pci_dev->device_id));
 		json_object_object_add(device_data_obj, "subsystem_vendor",
-			json_object_new_uint64(pci->subvendor_id));
+			json_object_new_uint64(pci_dev->subvendor_id));
 		json_object_object_add(device_data_obj, "subsystem_device",
-			json_object_new_uint64(pci->subdevice_id));
+			json_object_new_uint64(pci_dev->subdevice_id));
+
+		bus_data_obj = json_object_new_object();
+		json_object_object_add(bus_data_obj, "domain",
+			json_object_new_uint64(pci_bus->domain));
+		json_object_object_add(bus_data_obj, "bus",
+			json_object_new_uint64(pci_bus->bus));
+		json_object_object_add(bus_data_obj, "slot",
+			json_object_new_uint64(pci_bus->dev));
+		json_object_object_add(bus_data_obj, "function",
+			json_object_new_uint64(pci_bus->func));
 		break;
 	case DRM_BUS_USB:;
-		drmUsbDeviceInfo *usb = dev->deviceinfo.usb;
+		drmUsbDeviceInfo *usb_dev = dev->deviceinfo.usb;
+		drmUsbBusInfo *usb_bus = dev->businfo.usb;
+
 		device_data_obj = json_object_new_object();
 		json_object_object_add(device_data_obj, "vendor",
-			json_object_new_uint64(usb->vendor));
+			json_object_new_uint64(usb_dev->vendor));
 		json_object_object_add(device_data_obj, "product",
-			json_object_new_uint64(usb->product));
+			json_object_new_uint64(usb_dev->product));
+
+		bus_data_obj = json_object_new_object();
+		json_object_object_add(bus_data_obj, "bus",
+			json_object_new_uint64(usb_bus->bus));
+		json_object_object_add(bus_data_obj, "device",
+			json_object_new_uint64(usb_bus->dev));
 		break;
 	case DRM_BUS_PLATFORM:;
-		drmPlatformDeviceInfo *platform = dev->deviceinfo.platform;
+		drmPlatformDeviceInfo *platform_dev = dev->deviceinfo.platform;
+		drmPlatformBusInfo *platform_bus = dev->businfo.platform;
+
 		device_data_obj = json_object_new_object();
 		struct json_object *compatible_arr = json_object_new_array();
-		for (size_t i = 0; platform->compatible[i]; ++i)
+		for (size_t i = 0; platform_dev->compatible[i]; ++i)
 			json_object_array_add(compatible_arr,
-				json_object_new_string(platform->compatible[i]));
+				json_object_new_string(platform_dev->compatible[i]));
 		json_object_object_add(device_data_obj, "compatible", compatible_arr);
+
+		bus_data_obj = json_object_new_object();
+		json_object_object_add(bus_data_obj, "fullname",
+			json_object_new_string(platform_bus->fullname));
 		break;
 	}
 	json_object_object_add(obj, "device_data", device_data_obj);
+	json_object_object_add(obj, "bus_data", bus_data_obj);
 
 	drmFreeDevice(&dev);
 
