@@ -38,6 +38,8 @@ static const char *amd_tile_version_str(uint64_t tile_version) {
 
 static const char *amd_tile_str(uint64_t tile, uint64_t tile_version) {
 	switch (tile_version) {
+	case AMD_FMT_MOD_TILE_VER_GFX11:
+		/* fallthrough */
 	case AMD_FMT_MOD_TILE_VER_GFX10_RBPLUS:
 		/* fallthrough */
 	case AMD_FMT_MOD_TILE_VER_GFX10:
