@@ -34,7 +34,6 @@ libdrm = dependency('libdrm',
   ],
 )
 
-inc = []
 # libdrm pretty consistently pulls in the linux userspace API headers.
 # We want a new libdrm to get all of the #defines in those headers, but
 # we don't actually need to link against a new version of libdrm itself.
@@ -55,8 +54,10 @@ if libdrm.version().version_compare('<2.4.115')
     warning(s)
   endforeach
 
+  # Sadly we need to circumvent Meson's sandbox here. There is no other way to
+  # link to the system libdrm *and* use drm_fourcc.h from the subproject.
   fourcc_h = meson.current_source_dir() / 'subprojects/libdrm/include/drm/drm_fourcc.h'
-  inc += include_directories('subprojects/libdrm/include/drm')
+  add_project_arguments('-I' + meson.current_source_dir() / 'subprojects/libdrm/include/drm', language: 'c')
   libdrm = libdrm.partial_dependency(link_args: true)
 elif libdrm.type_name() == 'internal'
   fourcc_h = meson.current_source_dir() / 'subprojects/libdrm/include/drm/drm_fourcc.h'
@@ -80,7 +81,6 @@ tables_c = custom_target('tables_c',
 
 executable('drm_info',
   ['main.c', 'modifiers.c', 'json.c', 'pretty.c', tables_c],
-  include_directories: inc,
   dependencies: [libdrm, libpci, jsonc],
   install: true,
 )
