@@ -30,6 +30,8 @@ static const char *amd_tile_version_str(uint64_t tile_version) {
 		return "GFX10";
 	case AMD_FMT_MOD_TILE_VER_GFX10_RBPLUS:
 		return "GFX10_RBPLUS";
+	case AMD_FMT_MOD_TILE_VER_GFX11:
+		return "GFX11";
 	}
 	return "unknown";
 }
@@ -52,6 +54,8 @@ static const char *amd_tile_str(uint64_t tile, uint64_t tile_version) {
 			return "GFX9_64K_D_X";
 		case AMD_FMT_MOD_TILE_GFX9_64K_R_X:
 			return "GFX9_64K_R_X";
+		case AMD_FMT_MOD_TILE_GFX11_256K_R_X:
+			return "GFX11_256K_R_X";
 		}
 	}
 	return "unknown";
