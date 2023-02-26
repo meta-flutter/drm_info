@@ -45,19 +45,26 @@ if libdrm.version().version_compare('<2.4.115')
     error('libdrm subproject out of date. Run `meson subprojects update`.')
   endif
 
-  msg = [
-    'System libdrm version does not have latest Linux DRM headers.',
-    'Attempting to use headers from meson subproject if present.',
-    'If this fails, update your system libdrm or run `meson subprojects download`.',
-  ]
-  foreach s : msg
-    warning(s)
-  endforeach
-
   # Sadly we need to circumvent Meson's sandbox here. There is no other way to
   # link to the system libdrm *and* use drm_fourcc.h from the subproject.
-  fourcc_h = meson.current_source_dir() / 'subprojects/libdrm/include/drm/drm_fourcc.h'
-  add_project_arguments('-I' + meson.current_source_dir() / 'subprojects/libdrm/include/drm', language: 'c')
+  fourcc_h_dir = meson.current_source_dir() / 'subprojects/libdrm/include/drm'
+  fourcc_h = fourcc_h_dir / 'drm_fourcc.h'
+
+  if meson.version().version_compare('>= 0.53.0')
+    fs = import('fs')
+    if not fs.exists(fourcc_h)
+      error(
+        'System libdrm version does not have latest Linux DRM headers. ' +
+        'Update your system libdrm or run `meson subprojects download`.'
+      )
+    endif
+  else
+    warning('System libdrm version does not have latest Linux DRM headers.')
+    warning('Attempting to use headers from meson subproject if present.')
+    warning('If this fails, update your system libdrm or run `meson subprojects download`.')
+  endif
+
+  add_project_arguments('-I' + fourcc_h_dir, language: 'c')
   libdrm = libdrm.partial_dependency(link_args: true)
 elif libdrm.type_name() == 'internal'
   fourcc_h = meson.current_source_dir() / 'subprojects/libdrm/include/drm/drm_fourcc.h'
