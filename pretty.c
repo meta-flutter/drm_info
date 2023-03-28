@@ -168,7 +168,7 @@ static void print_device(struct json_object *obj)
 	printf("\n");
 }
 
-// The refresh rate provided by the mode itself is innacurate,
+// The refresh rate provided by the mode itself is inaccurate,
 // so we calculate it ourself.
 static int32_t refresh_rate(struct json_object *obj) {
 	int clock = get_object_object_uint64(obj, "clock");
