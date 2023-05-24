@@ -131,6 +131,7 @@ static struct json_object *device_info(int fd)
 		json_object_new_uint64(dev->bustype));
 
 	struct json_object *device_data_obj = NULL, *bus_data_obj = NULL;
+	struct json_object *compatible_arr = NULL;
 	switch (dev->bustype) {
 	case DRM_BUS_PCI:;
 		drmPciDeviceInfo *pci_dev = dev->deviceinfo.pci;
@@ -177,7 +178,7 @@ static struct json_object *device_info(int fd)
 		drmPlatformBusInfo *platform_bus = dev->businfo.platform;
 
 		device_data_obj = json_object_new_object();
-		struct json_object *compatible_arr = json_object_new_array();
+		compatible_arr = json_object_new_array();
 		for (size_t i = 0; platform_dev->compatible[i]; ++i)
 			json_object_array_add(compatible_arr,
 				json_object_new_string(platform_dev->compatible[i]));
@@ -186,6 +187,21 @@ static struct json_object *device_info(int fd)
 		bus_data_obj = json_object_new_object();
 		json_object_object_add(bus_data_obj, "fullname",
 			json_object_new_string(platform_bus->fullname));
+		break;
+	case DRM_BUS_HOST1X:;
+		drmHost1xDeviceInfo *host1x_dev = dev->deviceinfo.host1x;
+		drmHost1xBusInfo *host1x_bus = dev->businfo.host1x;
+
+		device_data_obj = json_object_new_object();
+		compatible_arr = json_object_new_array();
+		for (size_t i = 0; host1x_dev->compatible[i]; ++i)
+			json_object_array_add(compatible_arr,
+				json_object_new_string(host1x_dev->compatible[i]));
+		json_object_object_add(device_data_obj, "compatible", compatible_arr);
+
+		bus_data_obj = json_object_new_object();
+		json_object_object_add(bus_data_obj, "fullname",
+			json_object_new_string(host1x_bus->fullname));
 		break;
 	}
 	json_object_object_add(obj, "device_data", device_data_obj);

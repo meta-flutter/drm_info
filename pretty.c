@@ -128,6 +128,7 @@ static void print_device(struct json_object *obj)
 	int available_nodes = get_object_object_uint64(obj, "available_nodes");
 	int bus_type = get_object_object_uint64(obj, "bus_type");
 	struct json_object *data_obj = json_object_object_get(obj, "device_data");
+	struct json_object *compatible_arr = NULL;
 
 	printf(L_VAL "Device: %s", bustype_str(bus_type));
 	switch (bus_type) {
@@ -153,8 +154,14 @@ static void print_device(struct json_object *obj)
 		printf(" %04x:%04x", usb_vendor, usb_product);
 		break;
 	case DRM_BUS_PLATFORM:;
-		struct json_object *compatible_arr =
-			json_object_object_get(data_obj, "compatible");
+		compatible_arr = json_object_object_get(data_obj, "compatible");
+		for (size_t i = 0; i < json_object_array_length(compatible_arr); i++) {
+			printf(" %s", json_object_get_string(
+				json_object_array_get_idx(compatible_arr, i)));
+		}
+		break;
+	case DRM_BUS_HOST1X:;
+		compatible_arr = json_object_object_get(data_obj, "compatible");
 		for (size_t i = 0; i < json_object_array_length(compatible_arr); i++) {
 			printf(" %s", json_object_get_string(
 				json_object_array_get_idx(compatible_arr, i)));
