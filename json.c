@@ -48,6 +48,39 @@ static const struct {
 	{ "SYNCOBJ_TIMELINE", DRM_CAP_SYNCOBJ_TIMELINE },
 };
 
+static struct json_object *tainted_info(void)
+{
+#ifndef __linux__
+	return NULL;
+#endif
+
+	FILE *f = fopen("/proc/sys/kernel/tainted", "r");
+	if (f == NULL) {
+		perror("fopen(/proc/sys/kernel/tainted)");
+		return NULL;
+	}
+
+	char str[64];
+	size_t n = fread(str, 1, sizeof(str) - 1, f);
+	if (!feof(f)) {
+		fclose(f);
+		fprintf(stderr, "fread(/proc/sys/kernel/tainted) failed");
+		return NULL;
+	}
+	str[n] = '\0';
+
+	fclose(f);
+
+	errno = 0;
+	unsigned long tainted = strtoull(str, NULL, 10);
+	if (errno != 0) {
+		perror("strtoull");
+		return NULL;
+	}
+
+	return json_object_new_uint64(tainted);
+}
+
 static struct json_object *kernel_info(void)
 {
 	struct utsname utsname;
@@ -63,6 +96,7 @@ static struct json_object *kernel_info(void)
 		json_object_new_string(utsname.release));
 	json_object_object_add(obj, "version",
 		json_object_new_string(utsname.version));
+	json_object_object_add(obj, "tainted", tainted_info());
 	return obj;
 }
 
