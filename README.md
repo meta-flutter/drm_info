@@ -4,30 +4,25 @@
 
 Small utility to dump info about DRM devices.
 
-Requires libdrm and json-c.
-
 ## Building
 
-Build with
-```
-meson build
-cd build
-ninja
-sudo ninja install
-```
+Requires libdrm and json-c.
+
+Build with:
+
+    meson setup build/
+    ninja -C build/
 
 If you don't have the minimum json-c version (0.13.0), meson will automatically
 download and compile it for you. If you don't want this, run the first meson
-command with
-```
-meson build --wrap-mode nofallback
-```
+command with:
+
+    meson setup build/ --wrap-mode=nofallback
 
 ## Usage
 
-```
-drm_info [-j] [--] [path]...
-```
+    drm_info [-j] [--] [path]...
+
 - `-j` - Output info in JSON. Otherwise the output is pretty-printed.
 - `path` - Zero or more paths to a DRM device to print info about, e.g.
 `/dev/dri/card0`. If no paths are given, all devices found in
@@ -42,9 +37,7 @@ support.
 Please help us gather more data! You can do so by uploading DRM information
 from your GPU.
 
-```
-drm_info -j | curl -d @- https://drmdb.emersion.fr/submit
-```
+    drm_info -j | curl -d @- https://drmdb.emersion.fr/submit
 
 This will upload information about your GPUs, your GPU drivers and your
 screens.
