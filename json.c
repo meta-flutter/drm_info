@@ -14,6 +14,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
+#include "base64.h"
 #include "drm_info.h"
 #include "tables.h"
 
@@ -573,9 +574,16 @@ static struct json_object *properties_info(int fd, uint32_t id, uint32_t type)
 		case DRM_MODE_PROP_OBJECT:
 			value_obj = json_object_new_uint64(value);
 			break;
-		case DRM_MODE_PROP_BLOB:
-			// TODO: base64-encode blob contents
-			value_obj = NULL;
+		case DRM_MODE_PROP_BLOB:;
+			drmModePropertyBlobRes *blob = drmModeGetPropertyBlob(fd, value);
+			if (!blob) {
+				perror("drmModeGetPropertyBlob");
+				break;
+			}
+			char *b64 = base64_encode(blob->data, blob->length);
+			drmModeFreePropertyBlob(blob);
+			value_obj = json_object_new_string(b64);
+			free(b64);
 			break;
 		case DRM_MODE_PROP_SIGNED_RANGE:
 			value_obj = json_object_new_int64((int64_t)value);
